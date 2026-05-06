@@ -1534,6 +1534,8 @@ let answers = [];
 let timerInterval = null;
 let timeLeft = 0;
 let sessionResults = null;
+let globalTimeLeft = 0;      // 30 минут = 1800 секунд
+let globalTimerInterval = null;
 
 // ===========================
 // HOME LOGIC
@@ -1573,21 +1575,31 @@ function startQuiz() {
   questions = buildQuestions();
   answers = new Array(questions.length).fill(null);
   currentIdx = 0;
+  
+  // Останавливаем старый таймер если есть
+  if (globalTimerInterval) clearInterval(globalTimerInterval);
+  
+  // Время = количество вопросов × 3 минуты (180 секунд)
+  const totalMinutes = questions.length * 3;  // 10→30, 20→60, 30→90, 50→150
+  globalTimeLeft = totalMinutes * 60;  // переводим в секунды
+  
+  updateGlobalTimerDisplay();
+  
+  // Запускаем глобальный таймер
+  globalTimerInterval = setInterval(() => {
+    globalTimeLeft--;
+    updateGlobalTimerDisplay();
+    
+    if (globalTimeLeft <= 0) {
+      clearInterval(globalTimerInterval);
+      globalTimerInterval = null;
+      finishQuiz();
+    }
+  }, 1000);
+  
   showScreen('quiz');
   renderQuestion();
 }
-
-function goHome() { showScreen('home'); renderHistory(); }
-function restartQuiz() { startQuiz(); }
-function backToResult() { showScreen('result'); }
-
-function confirmExit() {
-  if (confirm('Тестро қатъ кунед?')) {
-    clearTimer();
-    goHome();
-  }
-}
-
 // ===========================
 // QUIZ RENDER
 // ===========================
@@ -1612,8 +1624,6 @@ function renderQuestion() {
     badge.className = 'quiz-type-badge badge-open';
   }
 
-  // Timer
-  startTimer(q.type === 'closed' ? 45 : q.type === 'match' ? 90 : 60);
 
   // Next btn reset
   const nb = document.getElementById('next-btn');
@@ -1768,6 +1778,18 @@ function updateTimerDisplay() {
 function clearTimer() {
   if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
 }
+function updateGlobalTimerDisplay() {
+  const el = document.getElementById('timer-display');
+  const minutes = Math.floor(globalTimeLeft / 60);
+  const seconds = globalTimeLeft % 60;
+  el.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  
+  if (globalTimeLeft <= 60) {
+    el.classList.add('danger');
+  } else if (globalTimeLeft <= 120) {
+    el.classList.add('warning');
+  }
+}
 
 function autoSkip() {
   // Show correct answer briefly then move on
@@ -1781,7 +1803,6 @@ function autoSkip() {
 // NEXT / ANSWER
 // ===========================
 function nextQuestion(auto = false) {
-  clearTimer();
   const q = questions[currentIdx];
   const ans = answers[currentIdx];
 
@@ -1882,7 +1903,8 @@ function calcScore() {
 }
 
 function finishQuiz() {
-  clearTimer();
+  if (globalTimerInterval) clearInterval(globalTimerInterval);
+  globalTimerInterval = null;
   sessionResults = calcScore();
   saveHistory(sessionResults);
   showResultScreen(sessionResults);
