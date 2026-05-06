@@ -805,6 +805,173 @@
 
   sub { font-size: 0.75em; }
   sup { font-size: 0.75em; }
+  /* ===== ANIMATED FIGURES ===== */
+.animated-flask, .animated-atom, .animated-beaker, .animated-book {
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  height: 80px;
+  cursor: pointer;
+}
+
+/* Химическая колба */
+.flask-body {
+  position: absolute;
+  bottom: 0;
+  left: 15px;
+  width: 50px;
+  height: 55px;
+  background: rgba(59,130,246,0.15);
+  border: 3px solid var(--accent);
+  border-radius: 0 0 20px 20px;
+  overflow: hidden;
+}
+
+.flask-neck {
+  position: absolute;
+  top: 0;
+  left: 30px;
+  width: 20px;
+  height: 25px;
+  background: transparent;
+  border: 3px solid var(--accent);
+  border-bottom: none;
+  border-radius: 10px 10px 0 0;
+}
+
+.liquid {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  animation: bubble 2s ease-in-out infinite;
+}
+
+.bubble {
+  position: absolute;
+  background: rgba(255,255,255,0.6);
+  border-radius: 50%;
+  animation: rise 1.5s ease-in infinite;
+}
+
+.b1 { width: 6px; height: 6px; bottom: 20px; left: 10px; animation-delay: 0s; }
+.b2 { width: 4px; height: 4px; bottom: 35px; left: 25px; animation-delay: 0.5s; }
+.b3 { width: 8px; height: 8px; bottom: 10px; left: 35px; animation-delay: 1s; }
+
+@keyframes rise {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-50px); opacity: 0; }
+}
+
+@keyframes bubble {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+/* Атом */
+.animated-atom {
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+
+.nucleus {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  background: var(--gold);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 10px var(--gold);
+}
+
+.orbit {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 70px;
+  height: 70px;
+  border: 2px solid rgba(59,130,246,0.5);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.orbit1 { transform: translate(-50%, -50%) rotate(0deg); }
+.orbit2 { transform: translate(-50%, -50%) rotate(60deg); }
+.orbit3 { transform: translate(-50%, -50%) rotate(120deg); }
+
+.electron {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: var(--accent2);
+  border-radius: 50%;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: orbit-spin 2s linear infinite;
+}
+
+@keyframes orbit-spin {
+  from { transform: translateX(-50%) rotate(0deg); }
+  to { transform: translateX(-50%) rotate(360deg); }
+}
+
+/* Мензурка */
+.beaker-body {
+  position: absolute;
+  bottom: 0;
+  left: 10px;
+  width: 60px;
+  height: 60px;
+  background: rgba(16,185,129,0.15);
+  border: 3px solid var(--green);
+  border-radius: 0 0 15px 15px;
+}
+
+/* Книга */
+.animated-book {
+  position: relative;
+  width: 70px;
+  height: 60px;
+}
+
+.book-cover {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: var(--red);
+  border-radius: 5px;
+  animation: book-shake 0.5s ease-in-out infinite;
+}
+
+.book-pages {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  width: calc(100% - 10px);
+  height: calc(100% - 10px);
+  background: var(--surface);
+  border-radius: 3px;
+  animation: page-flip 1s ease-in-out infinite;
+}
+
+@keyframes book-shake {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(5deg); }
+}
+
+@keyframes page-flip {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.gold .flask-body { border-color: var(--gold); }
+.silver .orbit { border-color: #94a3b8; }
+.bronze .beaker-body { border-color: #cd7f32; }
 </style>
 </head>
 <body>
@@ -1927,11 +2094,14 @@ function calcGrade(percent) {
 function showResultScreen(r) {
   showScreen('result');
   const gradeEl = document.getElementById('result-grade-num');
-  const emoji = r.grade >= 9 ? '🏆' : r.grade >= 7 ? '🌟' : r.grade >= 5 ? '📚' : '💪';
+  
+  // Создаём анимированную фигурку вместо эмодзи
+  const emojiContainer = document.getElementById('result-emoji');
+  emojiContainer.innerHTML = getAnimatedFigure(r.grade);
+  
   const msg = r.grade >= 9 ? 'Аъло! Баракалло!' : r.grade >= 7 ? 'Хуб! Давом диҳед!' : r.grade >= 5 ? 'Қаноатбахш' : 'Бояд такрор кунед';
   const colors = { 10: '#f59e0b', 9: '#f59e0b', 8: '#10b981', 7: '#10b981', 6: '#3b82f6', 5: '#3b82f6', 4: '#ef4444', 3: '#ef4444', 2: '#ef4444', 1: '#ef4444' };
 
-  document.getElementById('result-emoji').textContent = emoji;
   gradeEl.textContent = r.grade;
   gradeEl.style.color = colors[r.grade];
   document.getElementById('result-msg').textContent = msg;
@@ -1942,6 +2112,38 @@ function showResultScreen(r) {
   document.getElementById('r-wrong').textContent = r.wrong + ' ✗';
   document.getElementById('r-skip').textContent = r.skip;
 }
+function getAnimatedFigure(grade) {
+  if (grade >= 9) {
+    return `<div class="animated-flask gold">
+      <div class="flask-body">
+        <div class="liquid" style="height: 60%"></div>
+        <div class="bubble b1"></div>
+        <div class="bubble b2"></div>
+        <div class="bubble b3"></div>
+      </div>
+      <div class="flask-neck"></div>
+    </div>`;
+  } else if (grade >= 7) {
+    return `<div class="animated-atom silver">
+      <div class="nucleus"></div>
+      <div class="orbit orbit1"><div class="electron"></div></div>
+      <div class="orbit orbit2"><div class="electron"></div></div>
+      <div class="orbit orbit3"><div class="electron"></div></div>
+    </div>`;
+  } else if (grade >= 5) {
+    return `<div class="animated-beaker bronze">
+      <div class="beaker-body">
+        <div class="liquid" style="height: 40%"></div>
+      </div>
+    </div>`;
+  } else {
+    return `<div class="animated-book">
+      <div class="book-cover"></div>
+      <div class="book-pages"></div>
+    </div>`;
+  }
+}
+  
 
 // ===========================
 // REVIEW
@@ -1991,9 +2193,23 @@ function showReview() {
 
 function confirmExit() {
   if (confirm('Тестро қатъ кунед?')) {
-    if (globalTimerInterval) clearInterval(globalTimerInterval);
-    globalTimerInterval = null;
-    goHome();
+    // Останавливаем глобальный таймер
+    if (globalTimerInterval) {
+      clearInterval(globalTimerInterval);
+      globalTimerInterval = null;
+    }
+    // Останавливаем старый таймер (на всякий случай)
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+    // Возвращаемся на главный экран
+    showScreen('home');
+    renderHistory();
+    // Сбрасываем текущий тест
+    questions = [];
+    answers = [];
+    currentIdx = 0;
   }
 }
   
