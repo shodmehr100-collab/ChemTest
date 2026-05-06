@@ -2272,6 +2272,38 @@ function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
+function restartQuiz() {
+  if (globalTimerInterval) {
+    clearInterval(globalTimerInterval);
+    globalTimerInterval = null;
+  }
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+  startQuiz();
+}
+
+function goHome() {
+  if (globalTimerInterval) {
+    clearInterval(globalTimerInterval);
+    globalTimerInterval = null;
+  }
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+  questions = [];
+  answers = [];
+  currentIdx = 0;
+  sessionResults = null;
+  showScreen('home');
+  renderHistory();
+}
+
+function backToResult() {
+  showScreen('result');
+}
 
 // ===========================
 // INIT
