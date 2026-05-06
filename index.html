@@ -1989,9 +1989,14 @@ function showReview() {
   });
 }
 
-// ===========================
-// HISTORY
-// ===========================
+function confirmExit() {
+  if (confirm('Тестро қатъ кунед?')) {
+    if (globalTimerInterval) clearInterval(globalTimerInterval);
+    globalTimerInterval = null;
+    goHome();
+  }
+}
+  
 function saveHistory(r) {
   const hist = JSON.parse(localStorage.getItem('kimyo_hist') || '[]');
   const modeNames = { all: 'Ҳама', closed: 'Пӯшида', match: 'Мувофиқат', open: 'Кушода' };
